@@ -23,7 +23,7 @@ typedef struct
 	uint8_t GPIO_PinMode              ;  //Modo de la configuracion: entrada, salida, analogo, F.Alternativa
 	uint8_t GPIO_PinSpeed             ;  //Velocidad de la respuesta del PIN (SOLO DIGITAL)
 	uint8_t GPIO_PinPuPdControl       ;  //Seleccionamos si deseamos una salida Pull-Up, Pull-Down o "libre"
-	uint8_t GPIO_PinDPType            ;  //Trabaja de la mano con el anterior, salecciona salid PUPD o OPenDrain
+	uint8_t GPIO_PinOPType            ;  //Trabaja de la mano con el anterior, salecciona salid PUPD o OPenDrain
 	uint8_t GPIO_PinAltFunMode        ;  //Selecciona cual es la funcion alternativa que se esta configurando
 
 }GPIO_PinConfig_t;
@@ -44,6 +44,6 @@ typedef struct
 void GPIO_Config      (GPIO_Handler_t *pGPIOHandler);
 void GPIO_WritePin    (GPIO_Handler_t *pPinHandler, uint8_t newState);
 uint32_t GPIO_ReadPin (GPIO_Handler_t *pPinHandler);
-void GPIOxTooglePin(GPIO_Handler_t *pPinHandler) ;
+void GPIOxTooglePin   (GPIO_Handler_t *pPinHandler);
 
 #endif /* GPIOXDRIVER_H_ */
