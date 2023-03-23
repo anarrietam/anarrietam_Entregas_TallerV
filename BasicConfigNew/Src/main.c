@@ -9,7 +9,7 @@
  */
 
 #include <stdint.h>
-
+#include <stm32f4xx.h>
 /**
  * Funcion principal del programa
  */

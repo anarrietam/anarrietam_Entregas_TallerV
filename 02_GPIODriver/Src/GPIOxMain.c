@@ -48,7 +48,7 @@ int main(void){
 	GPIO_Config(&handlerUserLedPin);
 
 	//Hacemos que el PIN A5 quede encendido
-	GPIO_WritePin(&handlerUserLedPin, SET);
+	GPIO_WritePin(&handlerUserLedPin, 0);
 
 	//Este es el ciclo principal, donde se ejecuta todo el programa
 	while(1){
