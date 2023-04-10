@@ -1,3 +1,17 @@
+/*
+ * GPIOxDriver.c
+ *
+ *  Created on: Mar 9, 2023
+ *      Author: anarrietam
+ */
+
+/******
+ * En este archivo se escribe el control para que sea lo mas generico
+ * posble, de fomra que independiente del puerto GPIO y el PIN seleccionado,
+ * el programa se ejecute y configure todo correctamente
+ ******/
+
+
 #include "GPIOxDriver.h"
 
 /**

@@ -1,14 +1,14 @@
 /*
  * ExtiDriver.c
  *
- *  Created on: Mar 24, 2023
+*  Created on: Mar 24, 2023
  *      Author: anarrietam
  */
 
 #include "ExtiDriver.h"
 #include "GPIOxDriver.h"
 
-// Haciendo prueba con PC15
+
 void extInt_Config(EXTI_Config_t *extiConfig){
 
 	/* 1.0 Se carga la configuración, que debe ser el PINx como entrada "simple" */
@@ -18,10 +18,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 
 	/* 3.0  Asignamos el canal EXTI que corresponde al PIN_y del puerto GPIO_X
-	 * Debemos activar la línea PIN_Xy (Y = A, B, C... y x = 0, 1, 2, 3...)
+	 * Debemos activar la línea PIN_Xy (X = A, B, C...  y = 0, 1, 2, 3...)
 	 * en el módulo EXTI */
 	switch (extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber) {
 	/* Configurando para el todos los pines GPIOX_0*/
+
 	case 0: {
 		/* SYSCFG_EXTICR1 */
 		// Limpiamos primero la posición que deseamos configurar
@@ -57,9 +58,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_1*/
 	case 1: {
 		/* SYSCFG_EXTICR1 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[0] &= ~(0xF << SYSCFG_EXTICR1_EXTI1_Pos);
-		// Ahora seleccionamos el valor a cargar en la posición, según sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+
+		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
+		// del puerto que vamos a utilizar: GPIOA_1, ó GPIOB_1, ó GPIOC_1, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[0] |= (SYSCFG_EXTICR1_EXTI1_PA);
 
@@ -88,9 +91,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_2*/
 	case 2: {
 		/* SYSCFG_EXTICR1 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[0] &= ~(0xF << SYSCFG_EXTICR1_EXTI2_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_2, ó GPIOB_2, ó GPIOC_2, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[0] |= (SYSCFG_EXTICR1_EXTI2_PA);
 
@@ -119,9 +124,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_3*/
 	case 3: {
 		/* SYSCFG_EXTICR1 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[0] &= ~(0xF << SYSCFG_EXTICR1_EXTI3_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_3, ó GPIOB_3, ó GPIOC_3, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[0] |= (SYSCFG_EXTICR1_EXTI3_PA);
 
@@ -146,13 +153,15 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 
 		break;
 	}
-
+	
 	/* Configurando para el todos los pines GPIOX_4*/
 	case 4: {
 		/* SYSCFG_EXTICR2 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[1] &= ~(0xF << SYSCFG_EXTICR2_EXTI4_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_4, ó GPIOB_4, ó GPIOC_4, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[1] |= (SYSCFG_EXTICR2_EXTI4_PA);
 
@@ -181,9 +190,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_5*/
 	case 5: {
 		/* SYSCFG_EXTICR2 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[1] &= ~(0xF << SYSCFG_EXTICR2_EXTI5_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_5, ó GPIOB_5, ó GPIOC_5, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[1] |= (SYSCFG_EXTICR2_EXTI5_PA);
 
@@ -212,9 +223,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_6*/
 	case 6: {
 		/* SYSCFG_EXTICR2 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[1] &= ~(0xF << SYSCFG_EXTICR2_EXTI6_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_6, ó GPIOB_6, ó GPIOC_6, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[1] |= (SYSCFG_EXTICR2_EXTI6_PA);
 
@@ -243,9 +256,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_7*/
 	case 7: {
 		/* SYSCFG_EXTICR2 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[1] &= ~(0xF << SYSCFG_EXTICR2_EXTI7_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_7, ó GPIOB_7, ó GPIOC_7, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[1] |= (SYSCFG_EXTICR2_EXTI7_PA);
 
@@ -274,9 +289,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_8*/
 	case 8: {
 		/* SYSCFG_EXTICR3 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[2] &= ~(0xF << SYSCFG_EXTICR3_EXTI8_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_8, ó GPIOB_8, ó GPIOC_8, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[2] |= (SYSCFG_EXTICR3_EXTI8_PA);
 
@@ -305,9 +322,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_9*/
 	case 9: {
 		/* SYSCFG_EXTICR3 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[2] &= ~(0xF << SYSCFG_EXTICR3_EXTI9_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_9, ó GPIOB_9, ó GPIOC_9, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[2] |= (SYSCFG_EXTICR3_EXTI9_PA);
 
@@ -336,9 +355,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_10*/
 	case 10: {
 		/* SYSCFG_EXTICR3 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[2] &= ~(0xF << SYSCFG_EXTICR3_EXTI10_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_10, ó GPIOB_10, ó GPIOC_10, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[2] |= (SYSCFG_EXTICR3_EXTI10_PA);
 
@@ -367,9 +388,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_11*/
 	case 11: {
 		/* SYSCFG_EXTICR3 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[2] &= ~(0xF << SYSCFG_EXTICR3_EXTI11_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_11, ó GPIOB_11, ó GPIOC_11, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[2] |= (SYSCFG_EXTICR3_EXTI11_PA);
 
@@ -398,9 +421,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_12*/
 	case 12: {
 		/* SYSCFG_EXTICR4 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[3] &= ~(0xF << SYSCFG_EXTICR4_EXTI12_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_12, ó GPIOB_12, ó GPIOC_12, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[3] |= (SYSCFG_EXTICR4_EXTI12_PA);
 
@@ -429,9 +454,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_13*/
 	case 13: {
 		/* SYSCFG_EXTICR4 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[3] &= ~(0xF << SYSCFG_EXTICR4_EXTI13_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_13, ó GPIOB_13, ó GPIOC_13, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[3] |= (SYSCFG_EXTICR4_EXTI13_PA);
 
@@ -460,9 +487,11 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* Configurando para el todos los pines GPIOX_14*/
 	case 14: {
 		/* SYSCFG_EXTICR4 */
+		// Limpiamos primero la posición que deseamos configurar
 		SYSCFG->EXTICR[3] &= ~(0xF << SYSCFG_EXTICR4_EXTI14_Pos);
+
 		// Ahora seleccionamos el valor a cargar en la posición, segun sea la selección
-		// del puerto que vamos a utilizar: GPIOA_0, ó GPIOB_0, ó GPIOC_0, etc
+		// del puerto que vamos a utilizar: GPIOA_14, ó GPIOB_14, ó GPIOC_14, etc
 		if (extiConfig->pGPIOHandler->pGPIOx == GPIOA) {
 			SYSCFG->EXTICR[3] |= (SYSCFG_EXTICR4_EXTI14_PA);
 
@@ -530,217 +559,208 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* 4.0 Seleccionamos el tipo de flanco */
 	if(extiConfig->edgeType == EXTERNAL_INTERRUPT_FALLING_EDGE){
 		/* Falling Trigger selection register*/
-		EXTI->FTSR = 0;	// Desactivamos todos los posibles flancos de bajada
-		EXTI->RTSR = 0;	// Llevando el registro a un valor conocido
-
 		switch(extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber){
-
-		/* Pin 0 */
-		case 0: {
-			EXTI->FTSR |= EXTI_FTSR_TR0;
+		case 0:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR0; // Ponemos el rising en reset value (0),ya que no será usado.
+			EXTI->FTSR &= ~EXTI_FTSR_TR0; // Limpiamos el registro para el bit TR necesitado.
+			EXTI->FTSR |= EXTI_FTSR_TR0; // Dejamos el bit necesitado del TR activado.
 			break;
 		}
-
-		/* Pin 1 */
-		case 1: {
+		case 1:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR1;
+			EXTI->FTSR &= ~EXTI_FTSR_TR1;
 			EXTI->FTSR |= EXTI_FTSR_TR1;
 			break;
 		}
-
-		/* Pin 2 */
-		case 2: {
+		case 2:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR2;
+			EXTI->FTSR &= ~EXTI_FTSR_TR2;
 			EXTI->FTSR |= EXTI_FTSR_TR2;
 			break;
 		}
-
-		/* Pin 3 */
-		case 3: {
+		case 3:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR3;
+			EXTI->FTSR &= ~EXTI_FTSR_TR3;
 			EXTI->FTSR |= EXTI_FTSR_TR3;
 			break;
 		}
-
-		/* Pin 4 */
-		case 4: {
+		case 4:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR4;
+			EXTI->FTSR &= ~EXTI_FTSR_TR4;
 			EXTI->FTSR |= EXTI_FTSR_TR4;
 			break;
 		}
-
-		/* Pin 5 */
-		case 5: {
+		case 5:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR5;
+			EXTI->FTSR &= ~EXTI_FTSR_TR5;
 			EXTI->FTSR |= EXTI_FTSR_TR5;
 			break;
 		}
-
-		/* Pin 6 */
-		case 6: {
+		case 6:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR6;
+			EXTI->FTSR &= ~EXTI_FTSR_TR6;
 			EXTI->FTSR |= EXTI_FTSR_TR6;
 			break;
 		}
-
-		/* Pin 7 */
-		case 7: {
+		case 7:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR7;
+			EXTI->FTSR &= ~EXTI_FTSR_TR7;
 			EXTI->FTSR |= EXTI_FTSR_TR7;
 			break;
 		}
-
-		/* Pin 8 */
-		case 8: {
+		case 8:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR8;
+			EXTI->FTSR &= ~EXTI_FTSR_TR8;
 			EXTI->FTSR |= EXTI_FTSR_TR8;
 			break;
 		}
-
-		/* Pin 9 */
-		case 9: {
+		case 9:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR9;
+			EXTI->FTSR &= ~EXTI_FTSR_TR9;
 			EXTI->FTSR |= EXTI_FTSR_TR9;
 			break;
 		}
-
-		/* Pin 10 */
-		case 10: {
+		case 10:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR10;
+			EXTI->FTSR &= ~EXTI_FTSR_TR10;
 			EXTI->FTSR |= EXTI_FTSR_TR10;
 			break;
 		}
-
-		/* Pin 11 */
-		case 11: {
+		case 11:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR11;
+			EXTI->FTSR &= ~EXTI_FTSR_TR11;
 			EXTI->FTSR |= EXTI_FTSR_TR11;
 			break;
 		}
-
-		/* Pin 12 */
-		case 12: {
+		case 12:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR12;
+			EXTI->FTSR &= ~EXTI_FTSR_TR12;
 			EXTI->FTSR |= EXTI_FTSR_TR12;
 			break;
 		}
-
-		/* Pin 13 */
-		case 13: {
+		case 13:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR13;
+			EXTI->FTSR &= ~EXTI_FTSR_TR13;
 			EXTI->FTSR |= EXTI_FTSR_TR13;
 			break;
 		}
-
-		/* Pin 14 */
-		case 14: {
+		case 14:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR14;
+			EXTI->FTSR &= ~EXTI_FTSR_TR14;
 			EXTI->FTSR |= EXTI_FTSR_TR14;
 			break;
 		}
-
-		/* Pin 15 */
-		case 15: {
+		case 15:{
+			EXTI->RTSR &= ~EXTI_RTSR_TR15;
+			EXTI->FTSR &= ~EXTI_FTSR_TR15;
 			EXTI->FTSR |= EXTI_FTSR_TR15;
 			break;
 		}
-
 		default: {
 			__NOP();
 			break;
 		}
 		}
-
 	}
 	else{
 		/* Rising Trigger selection register*/
-		EXTI->FTSR = 0;	// Desactivamos todos los posibles flancos de bajada
-		EXTI->RTSR = 0;	// Llevando el registro a un valor conocido
-
 		switch(extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber){
-
-		/* Pin 0 */
-		case 0: {
-			EXTI->RTSR |= EXTI_RTSR_TR0;
+		case 0:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR0; // Ponemos el falling en reset value (0),ya que no será usado.
+			EXTI->RTSR &= ~EXTI_RTSR_TR0; // Limpiamos el registro para el bit TR necesitado.
+			EXTI->RTSR |= EXTI_RTSR_TR0; // Dejamos el bit necesitado del TR activado.
 			break;
 		}
-
-		/* Pin 1 */
-		case 1: {
+		case 1:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR1;
+			EXTI->RTSR &= ~EXTI_RTSR_TR1;
 			EXTI->RTSR |= EXTI_RTSR_TR1;
 			break;
 		}
-
-		/* Pin 2 */
-		case 2: {
+		case 2:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR2;
+			EXTI->RTSR &= ~EXTI_RTSR_TR2;
 			EXTI->RTSR |= EXTI_RTSR_TR2;
 			break;
 		}
-
-		/* Pin 3 */
-		case 3: {
+		case 3:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR3;
+			EXTI->RTSR &= ~EXTI_RTSR_TR3;
 			EXTI->RTSR |= EXTI_RTSR_TR3;
 			break;
 		}
-
-		/* Pin 4 */
-		case 4: {
+		case 4:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR4;
+			EXTI->RTSR &= ~EXTI_RTSR_TR4;
 			EXTI->RTSR |= EXTI_RTSR_TR4;
 			break;
 		}
-
-		/* Pin 5 */
-		case 5: {
+		case 5:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR5;
+			EXTI->RTSR &= ~EXTI_RTSR_TR5;
 			EXTI->RTSR |= EXTI_RTSR_TR5;
 			break;
 		}
-
-		/* Pin 6 */
-		case 6: {
+		case 6:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR6;
+			EXTI->RTSR &= ~EXTI_RTSR_TR6;
 			EXTI->RTSR |= EXTI_RTSR_TR6;
 			break;
 		}
-
-		/* Pin 7 */
-		case 7: {
+		case 7:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR7;
+			EXTI->RTSR &= ~EXTI_RTSR_TR7;
 			EXTI->RTSR |= EXTI_RTSR_TR7;
 			break;
 		}
-
-		/* Pin 8 */
-		case 8: {
+		case 8:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR8;
+			EXTI->RTSR &= ~EXTI_RTSR_TR8;
 			EXTI->RTSR |= EXTI_RTSR_TR8;
 			break;
 		}
-
-		/* Pin 9 */
-		case 9: {
+		case 9:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR9;
+			EXTI->RTSR &= ~EXTI_RTSR_TR9;
 			EXTI->RTSR |= EXTI_RTSR_TR9;
 			break;
 		}
-
-		/* Pin 10 */
-		case 10: {
+		case 10:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR10;
+			EXTI->RTSR &= ~EXTI_RTSR_TR10;
 			EXTI->RTSR |= EXTI_RTSR_TR10;
 			break;
 		}
-
-		/* Pin 11 */
-		case 11: {
+		case 11:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR11;
+			EXTI->RTSR &= ~EXTI_RTSR_TR11;
 			EXTI->RTSR |= EXTI_RTSR_TR11;
 			break;
 		}
-
-		/* Pin 12 */
-		case 12: {
+		case 12:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR12;
+			EXTI->RTSR &= ~EXTI_RTSR_TR12;
 			EXTI->RTSR |= EXTI_RTSR_TR12;
 			break;
 		}
-
-		/* Pin 13 */
-		case 13: {
+		case 13:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR13;
+			EXTI->RTSR &= ~EXTI_RTSR_TR13;
 			EXTI->RTSR |= EXTI_RTSR_TR13;
 			break;
 		}
-
-		/* Pin 14 */
-		case 14: {
+		case 14:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR14;
+			EXTI->RTSR &= ~EXTI_RTSR_TR14;
 			EXTI->RTSR |= EXTI_RTSR_TR14;
 			break;
 		}
-
-		/* Pin 15 */
-		case 15: {
+		case 15:{
+			EXTI->FTSR &= ~EXTI_FTSR_TR15;
+			EXTI->RTSR &= ~EXTI_RTSR_TR15;
 			EXTI->RTSR |= EXTI_RTSR_TR15;
 			break;
 		}
-
 		default: {
 			__NOP();
 			break;
@@ -753,112 +773,92 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 
 	/* 6.0 Activamos la interrupción del canal que estamos configurando */
 	// Interrupt Mask register
-	EXTI->IMR = 0;
-
 	switch(extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber){
-
-	/* Pin 0 */
 	case 0: {
+		EXTI->IMR &= ~EXTI_IMR_IM0;
 		EXTI->IMR |= EXTI_IMR_IM0;
 		break;
 	}
-
-	/* Pin 1 */
 	case 1: {
+		EXTI->IMR &= ~EXTI_IMR_IM1;
 		EXTI->IMR |= EXTI_IMR_IM1;
 		break;
 	}
-
-	/* Pin 2 */
 	case 2: {
+		EXTI->IMR &= ~EXTI_IMR_IM2;
 		EXTI->IMR |= EXTI_IMR_IM2;
 		break;
 	}
-
-	/* Pin 3 */
 	case 3: {
+		EXTI->IMR &= ~EXTI_IMR_IM3;
 		EXTI->IMR |= EXTI_IMR_IM3;
 		break;
 	}
-
-	/* Pin 4 */
 	case 4: {
+		EXTI->IMR &= ~EXTI_IMR_IM4;
 		EXTI->IMR |= EXTI_IMR_IM4;
 		break;
 	}
-
-	/* Pin 5 */
 	case 5: {
+		EXTI->IMR &= ~EXTI_IMR_IM5;
 		EXTI->IMR |= EXTI_IMR_IM5;
 		break;
 	}
-
-	/* Pin 6 */
 	case 6: {
+		EXTI->IMR &= ~EXTI_IMR_IM6;
 		EXTI->IMR |= EXTI_IMR_IM6;
 		break;
 	}
-
-	/* Pin 7 */
 	case 7: {
+		EXTI->IMR &= ~EXTI_IMR_IM7;
 		EXTI->IMR |= EXTI_IMR_IM7;
 		break;
 	}
-
-	/* Pin 8 */
 	case 8: {
+		EXTI->IMR &= ~EXTI_IMR_IM8;
 		EXTI->IMR |= EXTI_IMR_IM8;
 		break;
 	}
-
-	/* Pin 9 */
 	case 9: {
+		EXTI->IMR &= ~EXTI_IMR_IM9;
 		EXTI->IMR |= EXTI_IMR_IM9;
 		break;
 	}
-
-	/* Pin 10 */
 	case 10: {
+		EXTI->IMR &= ~EXTI_IMR_IM10;
 		EXTI->IMR |= EXTI_IMR_IM10;
 		break;
 	}
-
-	/* Pin 11 */
 	case 11: {
+		EXTI->IMR &= ~EXTI_IMR_IM11;
 		EXTI->IMR |= EXTI_IMR_IM11;
 		break;
 	}
-
-	/* Pin 12 */
 	case 12: {
+		EXTI->IMR &= ~EXTI_IMR_IM12;
 		EXTI->IMR |= EXTI_IMR_IM12;
 		break;
 	}
-
-	/* Pin 13 */
 	case 13: {
+		EXTI->IMR &= ~EXTI_IMR_IM13;
 		EXTI->IMR |= EXTI_IMR_IM13;
 		break;
 	}
-
-	/* Pin 14 */
 	case 14: {
+		EXTI->IMR &= ~EXTI_IMR_IM14;
 		EXTI->IMR |= EXTI_IMR_IM14;
 		break;
 	}
-
-	/* Pin 15 */
 	case 15: {
+		EXTI->IMR &= ~EXTI_IMR_IM15;
 		EXTI->IMR |= EXTI_IMR_IM15;
 		break;
 	}
-
 	default: {
 		__NOP();
 		break;
 	}
 	}
-
 
 	/* 6.1 Matriculamos la interrupción en el NVIC para el canal correspondiente,
 	 * donde el canal 0 corresponde al EXTI_0, canal 1 al EXTI_1, etc.
@@ -957,83 +957,52 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 }
 
 
-/* Callback para PIN_0 */
+/**/
 __attribute__ ((weak)) void callback_extInt0(void){
 	__NOP();
 }
-
-/* Callback para PIN_1 */
 __attribute__ ((weak)) void callback_extInt1(void){
 	__NOP();
 }
-
-/* Callback para PIN_2 */
 __attribute__ ((weak)) void callback_extInt2(void){
 	__NOP();
 }
-
-
-/* Callback para PIN_3 */
 __attribute__ ((weak)) void callback_extInt3(void){
 	__NOP();
 }
-
-/* Callback para PIN_4 */
 __attribute__ ((weak)) void callback_extInt4(void){
 	__NOP();
 }
-
-/* Callback para PIN_5 */
 __attribute__ ((weak)) void callback_extInt5(void){
 	__NOP();
 }
-
-/* Callback para PIN_6 */
 __attribute__ ((weak)) void callback_extInt6(void){
 	__NOP();
 }
-
-/* Callback para PIN_7 */
 __attribute__ ((weak)) void callback_extInt7(void){
 	__NOP();
 }
-
-/* Callback para PIN_8 */
 __attribute__ ((weak)) void callback_extInt8(void){
 	__NOP();
 }
-
-/* Callback para PIN_9 */
 __attribute__ ((weak)) void callback_extInt9(void){
 	__NOP();
 }
-
-/* Callback para PIN_10 */
 __attribute__ ((weak)) void callback_extInt10(void){
 	__NOP();
 }
-
-/* Callback para PIN_11 */
 __attribute__ ((weak)) void callback_extInt11(void){
 	__NOP();
 }
-
-/* Callback para PIN_12 */
 __attribute__ ((weak)) void callback_extInt12(void){
 	__NOP();
 }
-
-/* Callback para PIN_13 */
 __attribute__ ((weak)) void callback_extInt13(void){
 	__NOP();
 }
-
-/* Callback para PIN_14 */
 __attribute__ ((weak)) void callback_extInt14(void){
 	__NOP();
 }
-
-/* Callback para PIN_15 */
 __attribute__ ((weak)) void callback_extInt15(void){
 	__NOP();
 }
@@ -1042,62 +1011,38 @@ __attribute__ ((weak)) void callback_extInt15(void){
 void EXTI0_IRQHandler(void){
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_0 del GPIO_X
 	if(EXTI->PR & EXTI_PR_PR0){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR0;
-
-		// llamamos al callback
-		callback_extInt0();
+		EXTI->PR |= EXTI_PR_PR0; // Bajamos la bandera correspondiente
+		callback_extInt0(); // llamamos al callback
 	}
 }
-
-/* ISR de la interrupción canal 1*/
 void EXTI1_IRQHandler(void){
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_1 del GPIO_X
 	if(EXTI->PR & EXTI_PR_PR1){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR1;
-
-		// llamamos al callback
 		callback_extInt1();
 	}
 }
-
-/* ISR de la interrupción canal 2*/
 void EXTI2_IRQHandler(void){
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_2 del GPIO_X
 	if(EXTI->PR & EXTI_PR_PR2){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR2;
-
-		// llamamos al callback
 		callback_extInt2();
 	}
 }
-
-/* ISR de la interrupción canal 3*/
 void EXTI3_IRQHandler(void){
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_3 del GPIO_X
 	if(EXTI->PR & EXTI_PR_PR3){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR3;
-
-		// llamamos al callback
 		callback_extInt3();
 	}
 }
-
-/* ISR de la interrupción canal 4*/
 void EXTI4_IRQHandler(void){
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_4 del GPIO_X
 	if(EXTI->PR & EXTI_PR_PR4){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR4;
-
-		// llamamos al callback
 		callback_extInt4();
 	}
 }
-
 /* ISR de la interrupción canales 9_5
  * Observe que debe agregar totos los posibles casos, los cuales
  * son identificados por un bloque if() y el analisis de la bandera
@@ -1106,113 +1051,56 @@ void EXTI4_IRQHandler(void){
 void EXTI9_5_IRQHandler(void){
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_5 del GPIO_X
 	if(EXTI->PR & EXTI_PR_PR5){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR5;
-
-		// llamamos al callback
-		callback_extInt5();
+		EXTI->PR |= EXTI_PR_PR5; // Bajamos la bandera correspondiente
+		callback_extInt5(); // llamamos al callback
 	}
-
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_6 del GPIO_X
 	else if(EXTI->PR & EXTI_PR_PR6){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR6;
-
-		// llamamos al callback
 		callback_extInt6();
 	}
-
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_7 del GPIO_X
 	else if(EXTI->PR & EXTI_PR_PR7){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR7;
-
-		// llamamos al callback
 		callback_extInt7();
 	}
-
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_8 del GPIO_X
 	else if(EXTI->PR & EXTI_PR_PR8){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR8;
-
-		// llamamos al callback
 		callback_extInt8();
 	}
-
 	// Evaluamos si la interrupción que se lanzo corresponde al PIN_9 del GPIO_X
 	else if(EXTI->PR & EXTI_PR_PR9){
-		// Bajamos la bandera correspondiente
 		EXTI->PR |= EXTI_PR_PR9;
-
-		// llamamos al callback
 		callback_extInt9();
 	}
 }
-
 /* ISR de la interrupción canales 15_10
- * Observe que debe agregar totos los posibles casos, los cuales
- * son identificados por un bloque if() y el analisis de la bandera
- * (pending register -> EXTI_PR)
  */
 void EXTI15_10_IRQHandler(void){
-	// Evaluamos si la interrupción que se lanzo corresponde al PIN_Y_10
+	// Evaluamos si la interrupción que se lanzo corresponde al PIN_Y del GPIO_X
 	if(EXTI->PR & EXTI_PR_PR10){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR10;
-
-		// llamamos al callback
-		callback_extInt10();
-
+		EXTI->PR |= EXTI_PR_PR10; // Bajamos la bandera correspondiente
+		callback_extInt10(); // Llamamos al callback
 	}
-
-	// Evaluamos si la interrupción que se lanzo corresponde al PIN_Y_11
-	else if(EXTI->PR & EXTI_PR_PR11){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR11;
-
-		// llamamos al callback
-		callback_extInt11();
-
-	}
-
-	// Evaluamos si la interrupción que se lanzo corresponde al PIN_Y_12
-	else if(EXTI->PR & EXTI_PR_PR12){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR12;
-
-		// llamamos al callback
-		callback_extInt12();
-
-	}
-
-	// Evaluamos si la interrupción que se lanzo corresponde al PIN_Y_13
-	else if(EXTI->PR & EXTI_PR_PR13){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR13;
-
-		// llamamos al callback
-		callback_extInt13();
-
-	}
-
-	// Evaluamos si la interrupción que se lanzo corresponde al PIN_Y_14
-	else if(EXTI->PR & EXTI_PR_PR14){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR14;
-
-		// llamamos al callback
-		callback_extInt14();
-
-	}
-
-	// Evaluamos si la interrupción que se lanzo corresponde al PIN_Y_15
-	else if(EXTI->PR & EXTI_PR_PR15){
-		// Bajamos la bandera correspondiente
-		EXTI->PR |= EXTI_PR_PR15;
-
-		// llamamos al callback
-		callback_extInt15();
-
-	}
+    else if(EXTI->PR & EXTI_PR_PR11){
+    	EXTI->PR |= EXTI_PR_PR11;
+    	callback_extInt11();
+    }
+    else if(EXTI->PR & EXTI_PR_PR12){
+    	EXTI->PR |= EXTI_PR_PR12;
+    	callback_extInt12();
+    }
+    else if(EXTI->PR & EXTI_PR_PR13){
+    	EXTI->PR |= EXTI_PR_PR13;
+    	callback_extInt13();
+    }
+    else if(EXTI->PR & EXTI_PR_PR14){
+    	EXTI->PR |= EXTI_PR_PR14;
+    	callback_extInt14();
+    }
+    else if(EXTI->PR & EXTI_PR_PR15){
+    	EXTI->PR |= EXTI_PR_PR15;
+    	callback_extInt15();
+    }
 }
