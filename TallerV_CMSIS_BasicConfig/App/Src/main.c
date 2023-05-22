@@ -17,6 +17,7 @@
 #include "ExtiDriver.h"
 #include "USARTxDriver.h"
 #include "SysTickDriver.h"
+#include "PwmDriver.h"
 
 #define HSI_CLOCK_CONFIGURED 0  // 16MHz
 #define HSE_CLOCK_CONFIGURED 1
@@ -30,10 +31,17 @@ GPIO_Handler_t handlerUSARTPINTX = {0};
 GPIO_Handler_t handlerUSARTPINRX = {0};
 USART_Handler_t USART2Comm = {0};
 
+// Prueba del PWM
+GPIO_Handler_t HandlerPWM = {0};
+PWM_Handler_t handlerTIM3PWM = {0};
+
+//Variables para pruebas
+
 uint8_t sendMSG = 0;
 char mensaje[] = "HOLA\n";
 uint8_t newChar = 0;
-
+uint16_t duttyValue = 1000;
+uint8_t teclaA = 0;
 
 
 int main(void){
@@ -78,10 +86,32 @@ int main(void){
 	USART2Comm.USART_Config.USART_parity = USART_PARITY_NONE;
 	USART2Comm.USART_Config.USART_mode = USART_MODE_RXTX;
 	USART2Comm.USART_Config.USART_stopbits = USART_STOPBIT_1;
-	USART2Comm.USART_Config.USART_enable_IntRx = USART_RX_INTERRUPT_ENABLE;
-	USART2Comm.USART_Config.USART_enable_IntTx = USART_TX_INTERRUPT_DISABLE;
+	USART2Comm.USART_Config.USART_enableIntRX = USART_RX_INTERRUP_ENABLE;
 
 	USART_Config(&USART2Comm);
+
+	HandlerPWM.pGPIOx          = GPIOC;
+	HandlerPWM.GPIO_PinConfig.GPIO_PinNumber  = PIN_7;
+	HandlerPWM.GPIO_PinConfig.GPIO_PinMode    = GPIO_MODE_ALTFN;
+	HandlerPWM.GPIO_PinConfig.GPIO_PinOPType  = GPIO_OTYPE_PUSHPULL;
+	HandlerPWM.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	HandlerPWM.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEED_FAST;
+	HandlerPWM.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+
+	GPIO_Config(&HandlerPWM);
+
+
+	handlerTIM3PWM.ptrTIMx           =  TIM3;
+	handlerTIM3PWM.config.channel       =   PWM_CHANNEL_2;
+	handlerTIM3PWM.config.duttyCicle    =   duttyValue;
+	handlerTIM3PWM.config.periodo       =   20000;
+	handlerTIM3PWM.config.prescaler     =   16;
+
+	pwm_Config(&handlerTIM3PWM);
+
+	enableOutput(&handlerTIM3PWM);
+	startPwmSignal(&handlerTIM3PWM);
+
 
 
 
@@ -92,13 +122,27 @@ int main(void){
     		writeMsg(&USART2Comm, mensaje);
     	}
 
-    }
+    	if ( newChar == 97) { //a
+    		duttyValue = 500;
+    		updateDuttyCycle(&handlerTIM3PWM, duttyValue);
+    	}else if ( newChar  == 119 ){ //w
+    	    duttyValue = 900;
+    	    updateDuttyCycle(&handlerTIM3PWM, duttyValue);
+    	  }else if ( newChar  == 115 ){ //s
+    	    duttyValue = 2500;
+    	    updateDuttyCycle(&handlerTIM3PWM, duttyValue);
+    	 }else if ( newChar == 100 ){ //d
+    	    duttyValue = 1800;
+    	    updateDuttyCycle(&handlerTIM3PWM, duttyValue);
+    	  }
 
+    }
 }
 
 void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerLedBlinky);
 	sendMSG++;
+
 
 }
 
