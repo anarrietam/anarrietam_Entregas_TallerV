@@ -12,9 +12,14 @@
 
 GPIO_Handler_t handler_Led2 = {0};
 GPIO_Handler_t handler_UserButton = {0};
+GPIO_Handler_t handlerDT = {0};
+GPIO_Handler_t handlerSW = {0};
+GPIO_Handler_t handlerCLK = {0};
 BasicTimer_Handler_t  HandlerBlinkyTimer = {0};
 uint32_t counterExti13 = 0;
 EXTI_Config_t exti1 = {0};
+EXTI_Config_t extiCount = {0};
+uint32_t countNum2 = 0;
 
 void callback_exti13 (void);
 void EXTI15_10_IRQHandler(void);
@@ -50,10 +55,33 @@ void init_Hardware(void){
 
 	GPIO_Config(&handler_UserButton);
 
-	exti1.edgeType = EXTERNAL_INTERRUPT_RISING_EDGE;
-	exti1.pGPIOHandler = &handler_UserButton;
+	handlerCLK.pGPIOx                                  = GPIOC;
+	handlerCLK.GPIO_PinConfig.GPIO_PinNumber           = PIN_1;
+	handlerCLK.GPIO_PinConfig.GPIO_PinMode             = GPIO_MODE_IN;
+	handlerCLK.GPIO_PinConfig.GPIO_PinOPType           = GPIO_OTYPE_PUSHPULL;
+	handlerCLK.GPIO_PinConfig.GPIO_PinPuPdControl      = GPIO_PUPDR_NOTHING;
+	GPIO_Config(&handlerCLK);
 
-	extInt_Config(&exti1);
+	handlerDT.pGPIOx                                  = GPIOC;
+	handlerDT.GPIO_PinConfig.GPIO_PinNumber           = PIN_2;
+	handlerDT.GPIO_PinConfig.GPIO_PinMode             = GPIO_MODE_IN;
+	handlerDT.GPIO_PinConfig.GPIO_PinOPType           = GPIO_OTYPE_PUSHPULL;
+	handlerDT.GPIO_PinConfig.GPIO_PinPuPdControl      = GPIO_PUPDR_NOTHING;
+	GPIO_Config(&handlerDT);
+
+	handlerSW.pGPIOx                                  = GPIOC;
+	handlerSW.GPIO_PinConfig.GPIO_PinNumber           = PIN_3;
+	handlerSW.GPIO_PinConfig.GPIO_PinMode             = GPIO_MODE_IN;
+	handlerSW.GPIO_PinConfig.GPIO_PinOPType           = GPIO_OTYPE_PUSHPULL;
+	handlerSW.GPIO_PinConfig.GPIO_PinPuPdControl      = GPIO_PUPDR_NOTHING;
+	GPIO_Config(&handlerSW);
+
+
+	extiCount.edgeType = EXTERNAL_INTERRUPT_RISING_EDGE;
+	extiCount.pGPIOHandler = &handlerDT;
+	extInt_Config(&extiCount);
+
+
 
 }
 
@@ -66,6 +94,12 @@ void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handler_Led2);
 }
 
+void callbackextInt2 (void){
+	if (GPIO_ReadPin(&handlerDT)  == 1){
+		countNum2 ++;
+		counterExti13++;
+	}
+}
 
 int main (void){
 	init_Hardware();
