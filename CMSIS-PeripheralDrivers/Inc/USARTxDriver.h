@@ -85,6 +85,7 @@ int writeIntChar(USART_Handler_t *ptrUsartHandler, char dataToSend );
 void writeIntMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend );
 
 uint8_t getRxData (void);
+uint8_t getFlagTX (void);
 
 void usart1Rx_CallBack (void);
 void usart2Rx_CallBack (void);

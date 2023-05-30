@@ -56,15 +56,17 @@ I2C_Handler_t handlerLCD                   = {0};
 
 // Variables necesarias para el corrrecto desarrollo de la tarea
 char rxChar            = 0;                               // Variable para ingresar un char por consola
-char bufferData[64]    = "Accel ADXL345 testing...";      //  Mensaje a imprimir cuando se inicie el codigo
+char bufferData[64]    = "Accel ADXL345 testing...\n";      //  Mensaje a imprimir cuando se inicie el codigo
 uint8_t i2cBuffer      = {0};                             // Variable donde se guardan los datos del acelerometro
 uint16_t countMuestreo = 0;                               // Contador que nos ayudara con el muestreo
 uint8_t startTimer     = 0;
 uint16_t duttyValueX   = 30000;                           // Valor del dutty cicle para el PWM relacionado con el eje X del acelerometro
 uint16_t duttyValueY   = 30000;                           // Valor del dutty cicle para el PWM relacionado con el eje y del acelerometro
 uint16_t duttyValueZ   = 30000;                           // Valor del dutty cicle para el PWM relacionado con el eje z del acelerometro
+uint8_t countLastLine  = 0;                              // Contador que se encarga de "refrescar" la ultima linea de la LCD
 
-// Se crean unas matrices que ayudaran con el correcto funcionamiento del muestreo
+
+// Se crean unas matrices y variables que ayudaran con el correcto funcionamiento del muestreo
 float dataEjeX[2000] = {0};
 float dataEjeY[2000] = {0};
 float dataEjeZ[2000] = {0};
@@ -91,14 +93,15 @@ int16_t AccelZ       = 0;
 #define POWER_CTL                45
 #define DEVID                	 0
 
-#define BW_RATE					 44	//valor para cambiar el muestreo del acelerometro
+#define BW_RATE					 44	// Valor para cambiar el muestreo del acelerometro
+#define NewFRequency             0xE // Valor de la nueva frecuencia para el muestreo
 
 //Cabecera de las funciones utilizadas en el desarrollo de la tarea
 void initialConfig (void);
-void configAcelerometro(void);
-void generacionPWM(void);
-void encenderLCD(void);
-void datosAcelerometroLCD(void);
+void configAcelerometro(void);                                // Esta funcion se encarga de configurar el acelerometro, tomar los datos y mandar ciertos mensjaes por consola
+void generacionPWM(void);                                     // Se encarga de cambiar los duttys cicles de 3 PWM dependiendo de los valores arrojados por el acelerometro
+void encenderLCD(void);                                       // Son los mensajes que se pueden observar sobre la LCD que no se van a " refrescar" con los datos del acelerometro
+void datosAcelerometroLCD(void);                              //  En esta funcion se programa la LCD para ir mostrando los datos tomados por el acelerometro
 
 
 int main(void){
@@ -110,11 +113,10 @@ int main(void){
 	encenderLCD();
 
 	// Se cambia la velocidad de muestreo del acelerometro
-	i2c_writeSingleRegister(&handlerAcelerometro, BW_RATE , 0xE);
+	i2c_writeSingleRegister(&handlerAcelerometro, BW_RATE , NewFRequency);
 
 	// Se imprime el mensaje de inicio
 	writeMsg(&USART1Comm, bufferData);
-	//writeIntChar(&USART1Comm, 'a');
 
     while(1){
     	configAcelerometro();
@@ -293,7 +295,7 @@ void initialConfig (void){
 
 	handlerLCD.ptrI2Cx      = I2C2;
 	handlerLCD.modeI2C      = I2C_MODE_FM;
-	handlerLCD.slaveAddress = 0x24;
+	handlerLCD.slaveAddress = 0x24;                              // Direccion de la LCD, para comunicarse por I2C.
 	handlerLCD.mainClock    = MAIN_CLOCK_80_MHz_FOR_I2C;
 	handlerLCD.maxI2C_FM    = I2C_MAX_RISE_TIME_FM_80MHz;
 	handlerLCD.modeI2C_FM   = I2C_MODE_FM_SPEED_400KHz_80MHz;
@@ -307,7 +309,7 @@ void configAcelerometro(void){
 	//se inicia el acelerometro para la toma de datos
 	i2c_writeSingleRegister(&handlerAcelerometro, POWER_CTL , 0x2D);
 
-	//startTimer = 1;
+	// Se tomara 2000 datos para cada eje con ayuda un cintador manjeado con un timer ( TIM4)
 	if (countMuestreo <= 2001){
 		AccelX_low =  i2c_readSingleRegister(&handlerAcelerometro, ACCEL_DATAX0);
 		AccelX_high = i2c_readSingleRegister(&handlerAcelerometro, ACCEL_DATAX1);
@@ -319,35 +321,32 @@ void configAcelerometro(void){
 		AccelZ_high = i2c_readSingleRegister(&handlerAcelerometro, ACCEL_DATAZ1);
 		AccelZ = AccelZ_high << 8 | AccelZ_low;
 
+		// Lee eje por eje, y se va guardando en una matriz para cada eje, además se hace una conversion para que quede en m/s2
 		dataEjeX[countMuestreo] = (AccelX/256.f)*9.78;
 		dataEjeY[countMuestreo] = (AccelY/256.f)*9.78;
 		dataEjeZ[countMuestreo] = (AccelZ/232.f)*9.78;
 
 	}
-	//Hacemos un "eco" con el valor que nos llega por el serial
+
+	// Se crean una serie de acciones ordenadas con ayuda de los condicionales,
+	//para asì poder tener varios mensajes que se imprimen por consola
 	if(rxChar != '\0'){
-		writeChar(&USART1Comm, rxChar);
 
 		if(rxChar == 'w'){
-			sprintf(bufferData, "DEVID (r)\n");
-			writeMsg(&USART1Comm, bufferData);
 
 			i2cBuffer = i2c_readSingleRegister(&handlerAcelerometro, DEVID);
-			sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
+			sprintf(bufferData, "Direccion Acelerometro  = 0x%x \n", ACCEL_ADDRESS);
 			writeMsg(&USART1Comm, bufferData);
 			rxChar = '\0';
 		}
-		else if (rxChar == 'p'){
-			sprintf(bufferData, "POWER_CTL state (r)\n");
-			writeMsg(&USART1Comm, bufferData);
+		else if (rxChar == 'f'){
 
-			i2cBuffer = i2c_readSingleRegister(&handlerAcelerometro, POWER_CTL);
-			sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
+			sprintf(bufferData, "Frecuencia de muestreo = 1600 KHz \n");
 			writeMsg(&USART1Comm, bufferData);
 			rxChar = '\0';
 		}
 		else if (rxChar == 'r'){
-			sprintf(bufferData, "POWER_CTL reset (w)\n");
+			sprintf(bufferData, "POWER_CTL reset \n");
 			writeMsg(&USART1Comm, bufferData);
 
 			i2c_writeSingleRegister(&handlerAcelerometro, POWER_CTL , 0x2D);
@@ -385,8 +384,11 @@ void configAcelerometro(void){
 			writeMsg(&USART1Comm, bufferData);
 			rxChar = '\0';
 		}
-		else if (rxChar == 'b'){
+		// Este es el caso donde se imprimen 6000 datos ( 2000 datos por eje )
+		else if (rxChar == 'm'){
 			writeMsg(&USART1Comm, "Muestreo del acelerometro en todos los ejes \n" );
+			// para esto con ayuda de un for recorremos el arreglo para cada uno de los ejes, y con ayuda del sprintf, le damos el
+			//formato deseado antes de imprimir
 			for (int i=0;i<2000;i++){
 				sprintf(bufferData, " x = %.2f m/s²; y = %.2f m/s²; z = %.2f m/s²; # %d \n",  dataEjeX[i],dataEjeY[i],dataEjeZ[i],i);
 				writeMsg(&USART1Comm, bufferData);
@@ -399,8 +401,10 @@ void configAcelerometro(void){
 
 void generacionPWM(void){
 
+	// Se utiliza un for para recorrer los arreglos con las medidas por eje dadas por el acelerometro
 	for ( uint16_t x; x < 2000; x++){
 
+		// Estas medidas se dividen en 5 rangos, los cuales tienen un valor correspondiente del duttycicle
 		if (dataEjeX[x] <= -7.5){
 			updateDuttyCycle(&handlerPWMEjeX, 3000);
 		}else if (dataEjeX[x] > -7.5 && dataEjeX[x] <=  -2.5){
@@ -441,24 +445,33 @@ void generacionPWM(void){
 
 void encenderLCD(void){
 
+	// Despues de prender la LCD en el initialConfig, mandamos a mostrar los datos que no se van a refrescar cuando
+	// vayan variando las medidas del acelerometro
+
 	LCD_setCursor(&handlerLCD, 0, 0);
 	LCD_sendSTR(&handlerLCD, "Eje X = ");
-	LCD_setCursor(&handlerLCD, 0, 16);
+	LCD_setCursor(&handlerLCD, 0, 15);
 	LCD_sendSTR(&handlerLCD, "m/s2");
 	LCD_setCursor(&handlerLCD, 1, 0);
 	LCD_sendSTR(&handlerLCD, "Eje Y = ");
-	LCD_setCursor(&handlerLCD, 1, 16);
+	LCD_setCursor(&handlerLCD, 1, 15);
 	LCD_sendSTR(&handlerLCD, "m/s2");
 	LCD_setCursor(&handlerLCD, 2, 0);
 	LCD_sendSTR(&handlerLCD, "Eje Z = ");
-	LCD_setCursor(&handlerLCD, 2, 16);
+	LCD_setCursor(&handlerLCD, 2, 15);
 	LCD_sendSTR(&handlerLCD, "m/s2");
+	// Este mensaje va a iniciar la ultima linea pero se va a "referscar" con ayuda de un timer cada 10s
 	LCD_setCursor(&handlerLCD, 3, 0);
-	LCD_sendSTR(&handlerLCD, "Holi :3");
+	LCD_sendSTR(&handlerLCD, "Sens(Axis)= 0.04m/s2"); // Dato sacado del datasheet
 
 }
 
 void datosAcelerometroLCD(void){
+
+	// Los datos en la LCD se actualizaran cada que la variable startTimer sea igual 1,
+	// el timer que cambia esta variable lo hace cada 1s, ademàs de esto al final de condicional para
+	//la muestra de los datos se tiene una negacion de la variable, es decir de hace 0 al actuzalizar los datos,
+	// luego al pasar el tiempo del timer este se vuelve a hacer 1, haciendo que se vuelvan a actualizar los datos
 
 	if(startTimer == 1){
 		AccelX_low =  i2c_readSingleRegister(&handlerAcelerometro, ACCEL_DATAX0);
@@ -489,6 +502,17 @@ void datosAcelerometroLCD(void){
 		startTimer =! startTimer;
 	}
 
+	// se va a mostrar en la ultima linea un mensaje que dice la sensibilidad del acelerometro y la frecuencia de muestreo,
+	// el cual se va a "refrescar " cada 10s
+	if (countLastLine == 10){
+		LCD_setCursor(&handlerLCD, 3, 0);
+		LCD_sendSTR(&handlerLCD, "Sens(Axis)= 0.04m/s2"); // Dato sacado del datasheet
+	} else if (countLastLine == 20){
+		LCD_setCursor(&handlerLCD, 3, 0);
+		LCD_sendSTR(&handlerLCD, "Frecuencia = 1600mKHz");
+		countLastLine = 0;
+	}
+
 }
 
 void BasicTimer2_Callback(void){
@@ -497,6 +521,8 @@ void BasicTimer2_Callback(void){
 
 void BasicTimer4_Callback(void){
 
+	// Aumentamos el contador para el muestreo del acelerometro con este timer,
+	// además se coloca un condicional para que no sobrepase el valor de 2000
 	countMuestreo ++;
 	if(countMuestreo == 2000){
 		rxChar='\0';
@@ -507,7 +533,10 @@ void BasicTimer4_Callback(void){
 
 void BasicTimer5_Callback(void){
 
+	// Este timer al tener un periodo de 10000 a 100us, se demora 1s en completar esta accion, lo cual cambiaria
+	// la variable startTimer, cada que este tiempo se cumpla, y aumenta de a uno la variable counLastLine
 	startTimer =! startTimer;
+	countLastLine ++;
 }
 
 void usart1Rx_CallBack (void){

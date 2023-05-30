@@ -10,17 +10,14 @@
 #include "PLLDriver.h"
 #include "string.h"
 
-/**
- * Configurando el puerto Serial...
- * Recordar que siempre se debe comenzar con activar la señal de reloj
- * del periferico que se está utilizando.
- */
+// Variables que ayudan al correcto funcionamiento del USART
 
 uint8_t auxRxData = 0;
 uint8_t dataDR = 0;
 char *arregloDt = 0;
 uint8_t Tx_index = 0;
 uint8_t auxFn = 0;
+uint8_t flagTx = 0;
 
 void USART_Config(USART_Handler_t *ptrUsartHandler) {
 
@@ -308,81 +305,140 @@ void USART1_IRQHandler(void) {
 		auxRxData = (uint8_t) USART1->DR;
 		usart1Rx_CallBack();
 
+	// Se revisa si la interruopcion se dio por TX
 	} else if ( USART1->SR & USART_SR_TXE) {
 
+		// Revisamos si la interrupcion se activo para mandar un char
 		if (auxFn == 0) {
 
+			// Se carga la variable dataDR que tiene el char al registro DR
 			USART1->DR = dataDR;
+
+			// Luego de esto se apagan las interrupciones por TX
 			USART1->CR1 &= ~USART_CR1_TXEIE;
 
+			// Cambiamos la variable flag puesto que ya se finalizo la transmicion
+			flagTx = 0;
+
+			// L ainterrupcion se activa para mandar un Strinng
 		} else if (auxFn == 1) {
 
+			// recorremos el string revisando si el char a transmitir no es un caracter nulo
 			if (*(arregloDt + Tx_index) != '\0') {
+
+				// se manda el char a dataDR, y este se craga al registro DR
 				dataDR = *(arregloDt + Tx_index);
 				USART1->DR = dataDR;
+
+				// Se le suma una variable al indice que recorre el String
 				Tx_index++;
+
+				// Se revisa el bit para que la interrupcion de TX siga activa
 				USART1->CR1 |= USART_CR1_TXEIE;
-			} else if (USART1->SR & USART_SR_TC_Pos) {
+			} else {
+
+				// Cuando lleguemos al caracter nulo, desactivamos las interrupcciones por TX y decimos con ayuda de la
+				// variablr flagTX que la transmision ya se cumplio.
 				USART1->CR1 &= ~USART_CR1_TXEIE;
-				//yaestoylibre
+				flagTx = 0;
 			}
 
 		}
 	}
 }
 
-//void USART2_IRQHandler (void){
-//	//Evaluamos si la interrupcion se dio por RX
-//	if ( USART2->SR & USART_SR_RXNE){
-//		auxRxData = (uint8_t) USART2->DR;
-//		usart2Rx_CallBack();
-//	}
-//	else if( USART2->SR & USART_SR_TXE_Msk) {
-//		USART2->DR = dataDR;
-//		Tx_index = 1;
-//		USART2->DR = *(arregloDt+Tx_index);
-//		Tx_index ++;
-//		if (*(arregloDt+Tx_index) == 0){
-//			USART2->CR1 &= ~USART_CR1_TXEIE;
-//		}
-//
-//	}
-//}
+void USART2_IRQHandler(void) {
+	//Evaluamos si la interrupcion se dio por RX
+	if ( USART2->SR & USART_SR_RXNE) {
+		auxRxData = (uint8_t) USART2->DR;
+		usart2Rx_CallBack();
+	} else if ( USART2->SR & USART_SR_TXE_Msk) {
+		if (auxFn == 0) {
 
-//void USART6_IRQHandler (void){
-//	//Evaluamos si la interrupcion se dio por RX
-//	if ( USART6->SR & USART_SR_RXNE){
-//		auxRxData = (uint8_t) USART6->DR;
-//		usart6Rx_CallBack();
-//	}
-//	else if( USART6->SR & USART_SR_TXE_Msk) {
-//
-//		USART6->DR = dataDR;
-//		Tx_index = 1;
-//		USART6->DR = *(arregloDt+Tx_index);
-//		Tx_index ++;
-//		if (*(arregloDt+Tx_index) == 0){
-//			USART6->CR1 &= ~USART_CR1_TXEIE;
-//		}
-//	}
-//
-//}
+			USART2->DR = dataDR;
+			USART2->CR1 &= ~USART_CR1_TXEIE;
 
+		} else if (auxFn == 1) {
+
+			if (*(arregloDt + Tx_index) != '\0') {
+				dataDR = *(arregloDt + Tx_index);
+				USART2->DR = dataDR;
+				Tx_index++;
+				USART2->CR1 |= USART_CR1_TXEIE;
+			} else if (USART2->SR & USART_SR_TC_Pos) {
+				USART2->CR1 &= ~USART_CR1_TXEIE;
+				flagTx = 0;
+
+			}
+
+		}
+	}
+}
+void USART6_IRQHandler(void) {
+	//Evaluamos si la interrupcion se dio por RX
+	if ( USART6->SR & USART_SR_RXNE) {
+		auxRxData = (uint8_t) USART6->DR;
+		usart6Rx_CallBack();
+	} else if ( USART6->SR & USART_SR_TXE_Msk) {
+
+		if (auxFn == 0) {
+
+			USART6->DR = dataDR;
+			USART6->CR1 &= ~USART_CR1_TXEIE;
+
+		} else if (auxFn == 1) {
+
+			if (*(arregloDt + Tx_index) != '\0') {
+				dataDR = *(arregloDt + Tx_index);
+				USART6->DR = dataDR;
+				Tx_index++;
+				USART6->CR1 |= USART_CR1_TXEIE;
+			} else if (USART6->SR & USART_SR_TC_Pos) {
+				USART6->CR1 &= ~USART_CR1_TXEIE;
+			}
+
+		}
+	}
+}
+
+// Se crea una nueva funcion que se encargara de imprimir un char con ayuda de las interrupciones
 int writeIntChar(USART_Handler_t *ptrUsartHandler, char dataToSend) {
 
+	// Ponemos la variable flagTX en 1, para asi indicar que no se ha transmitido el dato
+	flagTx = 1;
+
+	// la variable auxFn ayudara en la interrupcion par asi saber si manda un char o un string
 	auxFn = 0;
+
+	// mandamos al dato a transmitir a la variable global
 	dataDR = dataToSend;
+
+	//Se activa el registro que hace saltar la interrupcion
 	ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TXEIE;
 
 	return dataToSend;
 }
 
+// Funcion que se encargara de mandar un string por interrupciones
 void writeIntMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend) {
-		//entronuevodato
+
+	// Ponemos la variable flagTX en 1, para asi indicar que no se ha transmitido el dato
+	flagTx = 1;
+
+	// la variable auxFn ayudara en la interrupcion par asi saber si manda un char o un string
 	auxFn = 1;
+
+	// Se asocian el puntero del string a mandar con una variable global del Driver
 	arregloDt = msgToSend;
+
+	// Se pone un 1 en el bit que activa la interrupcion en TX
 	ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TXEIE;
 
+}
+
+// Esta funcion nos ayuda a saber, si los datos mandados por interrupciones si se han terminado de mandar
+uint8_t getFlagTX (void){
+	return flagTx;
 }
 
 __attribute__((weak)) void usart1Rx_CallBack(void) {
@@ -397,5 +453,3 @@ __attribute__((weak)) void usart6Rx_CallBack(void) {
 	__NOP();
 }
 
-
-//get siestaocupadito
