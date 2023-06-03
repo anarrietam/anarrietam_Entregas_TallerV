@@ -18,6 +18,7 @@
 #include "USARTxDriver.h"
 #include "SysTickDriver.h"
 #include "PwmDriver.h"
+#include "AdcDriver.h"
 
 #define HSI_CLOCK_CONFIGURED 0  // 16MHz
 #define HSE_CLOCK_CONFIGURED 1
@@ -35,25 +36,33 @@ USART_Handler_t USART2Comm = {0};
 GPIO_Handler_t HandlerPWM = {0};
 PWM_Handler_t handlerTIM3PWM = {0};
 
+//PRUEBA DEL DRIVER ADC
+ADC_Config_t pruebaADC = {0};
+BasicTimer_Handler_t handlerTIM5 = {0};
+
 //Variables para pruebas
 
 uint8_t sendMSG = 0;
-char mensaje[] = "HOLA\n";
-uint8_t newChar = 0;
+char mensaje[64] = "HOLA\n";
+char newChar = 0;
 uint16_t duttyValue = 1000;
 uint8_t teclaA = 0;
+uint8_t adcIsComplete = 0;
+uint16_t dataADC = 0;
 
 
 int main(void){
 
 
-	// Activamos el FPU
-	//SCB->CPACR |= (0xF << 20);
+    // Activamos el FPU
+	SCB->CPACR |= (0xF << 20);
+
+	RCC->CR &= ~(RCC_CR_HSEON);
 
 	///Configuramos el pin A5 el cual se encargara del Led de estado
 
-	handlerLedBlinky.pGPIOx                             = GPIOA;
-	handlerLedBlinky.GPIO_PinConfig.GPIO_PinNumber      = PIN_5;
+	handlerLedBlinky.pGPIOx                             = GPIOH;
+	handlerLedBlinky.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
 	handlerLedBlinky.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
 	handlerLedBlinky.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
 	handlerLedBlinky.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
@@ -64,7 +73,7 @@ int main(void){
 	//Configuramos el TIM2, para asì poder lograr el parpadeo en el led de estado
 	handlerTIM2.ptrTIMx 							= TIM2;
 	handlerTIM2.TIMx_Config.TIMx_mode				= BTIMER_MODE_UP;
-	handlerTIM2.TIMx_Config.TIMx_period				= 500;
+	handlerTIM2.TIMx_Config.TIMx_period				= 250;
 	handlerTIM2.TIMx_Config.TIMx_speed				= BTIMER_SPEED_1ms;
 	BasicTimer_Config(&handlerTIM2);
 
@@ -86,70 +95,55 @@ int main(void){
 	USART2Comm.USART_Config.USART_parity = USART_PARITY_NONE;
 	USART2Comm.USART_Config.USART_mode = USART_MODE_RXTX;
 	USART2Comm.USART_Config.USART_stopbits = USART_STOPBIT_1;
-	USART2Comm.USART_Config.USART_enableIntRX = USART_RX_INTERRUP_ENABLE;
+	USART2Comm.USART_Config.USART_enable_IntRx = USART_RX_INTERRUPT_ENABLE;
 
 	USART_Config(&USART2Comm);
 
-	HandlerPWM.pGPIOx          = GPIOC;
-	HandlerPWM.GPIO_PinConfig.GPIO_PinNumber  = PIN_7;
-	HandlerPWM.GPIO_PinConfig.GPIO_PinMode    = GPIO_MODE_ALTFN;
-	HandlerPWM.GPIO_PinConfig.GPIO_PinOPType  = GPIO_OTYPE_PUSHPULL;
-	HandlerPWM.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	HandlerPWM.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEED_FAST;
-	HandlerPWM.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
-
-	GPIO_Config(&HandlerPWM);
 
 
-	handlerTIM3PWM.ptrTIMx           =  TIM3;
-	handlerTIM3PWM.config.channel       =   PWM_CHANNEL_2;
-	handlerTIM3PWM.config.duttyCicle    =   duttyValue;
-	handlerTIM3PWM.config.periodo       =   20000;
-	handlerTIM3PWM.config.prescaler     =   16;
-
-	pwm_Config(&handlerTIM3PWM);
-
-	enableOutput(&handlerTIM3PWM);
-	startPwmSignal(&handlerTIM3PWM);
+	pruebaADC.channel        = ADC_CHANNEL_0;
+	pruebaADC.dataAlignment  = ADC_ALIGNMENT_RIGHT;
+	pruebaADC.samplingPeriod = ADC_SAMPLING_PERIOD_84_CYCLES;
+	pruebaADC.resolution     = ADC_RESOLUTION_12_BIT;
+	adc_Config(&pruebaADC);
 
 
+
+	writeMsg(&USART2Comm, mensaje);
 
 
     while(1){
-
-    	if (sendMSG == 5){
-    		sendMSG = 0;
-    		writeMsg(&USART2Comm, mensaje);
+    	if(newChar != '\0'){
+    		if(newChar == 's'){
+    			// Comenzar la conversion
+    			startSingleADC();
+    		} else if (newChar == 'p'){
+    			newChar = '\0';
+    		}
+    		newChar = '\0';
     	}
+    	if ( adcIsComplete == 1){
 
-    	if ( newChar == 97) { //a
-    		duttyValue = 500;
-    		updateDuttyCycle(&handlerTIM3PWM, duttyValue);
-    	}else if ( newChar  == 119 ){ //w
-    	    duttyValue = 900;
-    	    updateDuttyCycle(&handlerTIM3PWM, duttyValue);
-    	  }else if ( newChar  == 115 ){ //s
-    	    duttyValue = 2500;
-    	    updateDuttyCycle(&handlerTIM3PWM, duttyValue);
-    	 }else if ( newChar == 100 ){ //d
-    	    duttyValue = 1800;
-    	    updateDuttyCycle(&handlerTIM3PWM, duttyValue);
-    	  }
-
+    		sprintf(mensaje, "data: %u\n", dataADC);
+    		writeMsg(&USART2Comm, mensaje);
+    		adcIsComplete = 0;
+ 	}
     }
 }
 
 void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerLedBlinky);
-	sendMSG++;
-
-
+	teclaA ++;
 }
+
 
 void usart2Rx_CallBack (void){
 	newChar = getRxData();
 	writeChar(&USART2Comm, newChar);
 }
 
-
+void adcComplete_Callback (void){
+	dataADC = getADC();
+	adcIsComplete = 1;
+}
 

@@ -2,7 +2,7 @@
  * LCDDriver.h
  *
  *  Created on: 25/05/2023
- *      Author: caordonezb
+ *      Author: anarrrietam
  */
 
 #ifndef LCDDRIVER_H_

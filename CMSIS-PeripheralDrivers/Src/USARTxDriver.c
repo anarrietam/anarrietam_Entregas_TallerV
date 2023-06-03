@@ -318,7 +318,7 @@ void USART1_IRQHandler(void) {
 			USART1->CR1 &= ~USART_CR1_TXEIE;
 
 			// Cambiamos la variable flag puesto que ya se finalizo la transmicion
-			flagTx = 0;
+			flagTx = 1;
 
 			// L ainterrupcion se activa para mandar un Strinng
 		} else if (auxFn == 1) {
@@ -340,7 +340,7 @@ void USART1_IRQHandler(void) {
 				// Cuando lleguemos al caracter nulo, desactivamos las interrupcciones por TX y decimos con ayuda de la
 				// variablr flagTX que la transmision ya se cumplio.
 				USART1->CR1 &= ~USART_CR1_TXEIE;
-				flagTx = 0;
+				flagTx = 1;
 			}
 
 		}
@@ -405,7 +405,7 @@ void USART6_IRQHandler(void) {
 int writeIntChar(USART_Handler_t *ptrUsartHandler, char dataToSend) {
 
 	// Ponemos la variable flagTX en 1, para asi indicar que no se ha transmitido el dato
-	flagTx = 1;
+	flagTx = 0;
 
 	// la variable auxFn ayudara en la interrupcion par asi saber si manda un char o un string
 	auxFn = 0;
@@ -423,7 +423,7 @@ int writeIntChar(USART_Handler_t *ptrUsartHandler, char dataToSend) {
 void writeIntMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend) {
 
 	// Ponemos la variable flagTX en 1, para asi indicar que no se ha transmitido el dato
-	flagTx = 1;
+	flagTx = 0;
 
 	// la variable auxFn ayudara en la interrupcion par asi saber si manda un char o un string
 	auxFn = 1;

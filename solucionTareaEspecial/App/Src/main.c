@@ -116,8 +116,9 @@ int main(void){
 	i2c_writeSingleRegister(&handlerAcelerometro, BW_RATE , NewFRequency);
 
 	// Se imprime el mensaje de inicio
-	writeMsg(&USART1Comm, bufferData);
-
+	while(!getFlagTX()){
+		writeIntMsg(&USART1Comm, bufferData);
+	}
     while(1){
     	configAcelerometro();
     	generacionPWM();
@@ -386,7 +387,7 @@ void configAcelerometro(void){
 		}
 		// Este es el caso donde se imprimen 6000 datos ( 2000 datos por eje )
 		else if (rxChar == 'm'){
-			writeMsg(&USART1Comm, "Muestreo del acelerometro en todos los ejes \n" );
+				writeMsg(&USART1Comm, "Muestreo del acelerometro en todos los ejes \n" );
 			// para esto con ayuda de un for recorremos el arreglo para cada uno de los ejes, y con ayuda del sprintf, le damos el
 			//formato deseado antes de imprimir
 			for (int i=0;i<2000;i++){
@@ -509,7 +510,7 @@ void datosAcelerometroLCD(void){
 		LCD_sendSTR(&handlerLCD, "Sens(Axis)= 0.04m/s2"); // Dato sacado del datasheet
 	} else if (countLastLine == 20){
 		LCD_setCursor(&handlerLCD, 3, 0);
-		LCD_sendSTR(&handlerLCD, "Frecuencia = 1600mKHz");
+		LCD_sendSTR(&handlerLCD, "Frecuencia = 1600KHz");
 		countLastLine = 0;
 	}
 
