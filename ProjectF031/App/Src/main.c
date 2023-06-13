@@ -22,19 +22,28 @@
 
 #include "GPIOxDriver.h"
 #include "BasicTimer.h"
+#include "USARTxDriver.h"
 
 GPIO_Handler_t hanlderLedPrueba = {0};
 BasicTimer_Handler_t handlerTimerLed = {0};
 
+// Prueba del usart
+USART_Handler_t USARTHandler = {0};
+GPIO_Handler_t  PINTX        = {0};
+GPIO_Handler_t  PINRX        = {0};
+
+// variables
+char rxChar = 0;
 //Header de las funcionas a implementar en el main
 void initConfig(void);
 
-int main(void)
-{
+int main(void){
 	initConfig();
-    while(1){
+	// Se imprime el mensaje de inicio
+	writeMsg(&USARTHandler, "Hola");
 
-    }
+    while(1){
+    	}
 }
 
 void initConfig(void){
@@ -57,8 +66,38 @@ void initConfig(void){
 
 	BasicTimer_Config(&handlerTimerLed);
 
+	USARTHandler.ptrUSARTx                           = USART1;
+	USARTHandler.USART_Config.USART_mode             = USART_MODE_RXTX;
+	USARTHandler.USART_Config.USART_baudrate         = USART_BAUDRATE_115200;
+	USARTHandler.USART_Config.USART_parity           = USART_PARITY_NONE;
+	USARTHandler.USART_Config.USART_stopbits         = USART_STOPBIT_1;
+	USARTHandler.USART_Config.USART_datasize         = USART_DATASIZE_8BIT;
+	USARTHandler.USART_Config.USART_enable_IntRx     = USART_RX_INTERRUPT_ENABLE;
+	USART_Config(&USARTHandler);
+
+	PINTX.pGPIOx                            = GPIOA;
+	PINTX.GPIO_PinConfig.GPIO_PinNumber     = PIN_2;
+	PINTX.GPIO_PinConfig.GPIO_PinMode       = GPIO_MODE_ALTFN;
+	PINTX.GPIO_PinConfig.GPIO_PinAltFunMode = AF1;
+	GPIO_Config(&PINTX);
+
+	PINRX.pGPIOx                            = GPIOA;
+	PINRX.GPIO_PinConfig.GPIO_PinNumber     = PIN_3;
+	PINRX.GPIO_PinConfig.GPIO_PinMode       = GPIO_MODE_ALTFN;
+	PINRX.GPIO_PinConfig.GPIO_PinAltFunMode = AF1;
+	GPIO_Config(&PINRX);
+
+
+
 }
 
 void BasicTimer14_Callback(void){
 	GPIOxTooglePin(&hanlderLedPrueba);
 }
+
+void usart1Rx_CallBack (void){
+	rxChar = getRxData();
+	writeChar(&USARTHandler, rxChar);
+}
+
+

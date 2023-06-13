@@ -36,22 +36,27 @@
 #define ADC_ALIGNMENT_RIGHT		0
 #define ADC_ALIGNMENT_LEFT		1
 
-#define ADC_SAMPLING_PERIOD_3_CYCLES	0b000;
-#define ADC_SAMPLING_PERIOD_15_CYCLES	0b001;
-#define ADC_SAMPLING_PERIOD_28_CYCLES	0b010;
-#define ADC_SAMPLING_PERIOD_56_CYCLES	0b011;
-#define ADC_SAMPLING_PERIOD_84_CYCLES	0b100;
-#define ADC_SAMPLING_PERIOD_112_CYCLES	0b101;
-#define ADC_SAMPLING_PERIOD_144_CYCLES	0b110;
-#define ADC_SAMPLING_PERIOD_480_CYCLES	0b111;
+#define ADC_SAMPLING_PERIOD_3_CYCLES	0b000
+#define ADC_SAMPLING_PERIOD_15_CYCLES	0b001
+#define ADC_SAMPLING_PERIOD_28_CYCLES	0b010
+#define ADC_SAMPLING_PERIOD_56_CYCLES	0b011
+#define ADC_SAMPLING_PERIOD_84_CYCLES	0b100
+#define ADC_SAMPLING_PERIOD_112_CYCLES	0b101
+#define ADC_SAMPLING_PERIOD_144_CYCLES	0b110
+#define ADC_SAMPLING_PERIOD_480_CYCLES	0b111
+
+#define ADC_SINGLE_CHANNEL   0
+#define ADC_MULTI_CHANNEL    1
 
 typedef struct
 {
-	uint8_t		channel;		// Canal ADC que será utilizado para la conversión ADC
+	uint8_t     mode;           // Modo del ADC, el multicanl esta configurado para 2 canales
+	uint8_t		channel;		// Primer canal ADC que será utilizado para la conversión ADC
+	uint8_t		channel2;		// Segundo canal ADC que será utilizado para la conversión ADC
 	uint8_t		resolution;		// Precisión con la que el ADC hace la adquisición del dato
 	uint16_t	samplingPeriod;	// Tiempo deseado para hacer la adquisición del dato
 	uint8_t		dataAlignment;	// Alineación a la izquierda o a la derecha
-	uint16_t	adcData;			//Dato de la conversión
+	uint16_t	adcData;		// Dato de la conversión
 }ADC_Config_t;
 
 void adc_Config(ADC_Config_t *adcConfig);

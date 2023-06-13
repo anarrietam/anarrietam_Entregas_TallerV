@@ -17,6 +17,7 @@
 #define MAIN_CLOCK_16_MHz_FOR_I2C  16
 #define MAIN_CLOCK_20_MHz_FOR_I2C  20
 #define MAIN_CLOCK_80_MHz_FOR_I2C  80
+#define MAIN_CLOCK_100_MHz_FOR_I2C 42
 
 #define I2C_MODE_SM  0
 #define I2C_MODE_FM  1

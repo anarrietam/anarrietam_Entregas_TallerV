@@ -4,8 +4,6 @@
  *  Created on: Month 06, 2023
  *      Author: anarrietam
  */
-#include "AdcDriver.h"
-#include "GPIOxDriver.h"
 
 #include "AdcDriver.h"
 #include "GPIOxDriver.h"
@@ -14,8 +12,16 @@ GPIO_Handler_t handlerAdcPin = {0};
 uint16_t	adcRawData = 0;
 
 void adc_Config(ADC_Config_t *adcConfig){
-	/* 1. Configuramos el PinX para que cumpla la función de canal análogo deseado. */
-	configAnalogPin(adcConfig->channel);
+
+	/*1. Verificamos si es single Channel, o multichannel */
+	if(adcConfig -> mode == ADC_SINGLE_CHANNEL){
+			configAnalogPin(adcConfig -> channel);
+	}
+	else if(adcConfig -> mode == ADC_MULTI_CHANNEL){
+			configAnalogPin(adcConfig -> channel);
+			configAnalogPin(adcConfig -> channel2);
+		}
+
 
 	/* 2. Activamos la señal de reloj para el periférico ADC1 (bus APB2)*/
 	RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
@@ -64,8 +70,16 @@ void adc_Config(ADC_Config_t *adcConfig){
 	}
 	}
 
-	/* 4. Configuramos el modo Scan como desactivado */
-	ADC1->CR1 &= ~ADC_CR1_SCAN;
+	/* 4. Configuramos el modo Scan mode */
+	if(adcConfig ->mode == ADC_SINGLE_CHANNEL){
+		//Configuramos el modo Scan como desactivado
+		ADC1 -> CR1 &= ~(ADC_CR1_SCAN);
+	}
+	else if(adcConfig -> mode == ADC_MULTI_CHANNEL){
+		//En el caso del multicanal activamos el MODE SCAN, para asì poder
+		// scanear constantemente en varios canales
+		ADC1 -> CR1  |= (ADC_CR1_SCAN);
+	}
 
 	/* 5. Configuramos la alineación de los datos (derecha o izquierda) */
 	if(adcConfig->dataAlignment == ADC_ALIGNMENT_RIGHT){
@@ -82,22 +96,58 @@ void adc_Config(ADC_Config_t *adcConfig){
 	ADC1->CR2 &= ~ADC_CR2_CONT;
 
 	/* 7. Acá se debería configurar el sampling...*/
-	if(adcConfig->channel < ADC_CHANNEL_10){
-		ADC1->SMPR2 |= (adcConfig -> samplingPeriod << (3*(adcConfig->channel)));
+	if(adcConfig->mode == ADC_SINGLE_CHANNEL){
+		if(adcConfig->channel < ADC_CHANNEL_10){
+				ADC1->SMPR2 |= (adcConfig -> samplingPeriod << (3*(adcConfig->channel)));
+			}
+			else{
+				ADC1->SMPR1 |= (adcConfig -> samplingPeriod << (3*(adcConfig->channel)));
+			}
+	} else if (adcConfig->mode == ADC_MULTI_CHANNEL){
+		if(adcConfig->channel < ADC_CHANNEL_10 ){
+			ADC1->SMPR2 |= (adcConfig -> samplingPeriod << (3*(adcConfig->channel)));
+		} else {
+			ADC1->SMPR1 |= (adcConfig -> samplingPeriod << (3*(adcConfig->channel)));
+		}
+		if (adcConfig->channel2 < ADC_CHANNEL_10) {
+			ADC1->SMPR2 |= (adcConfig->samplingPeriod << (3 * (adcConfig->channel2)));
+		} else {
+			ADC1->SMPR1 |= (adcConfig->samplingPeriod << (3 * (adcConfig->channel2)));
+		}
+
+
 	}
-	else{
-		ADC1->SMPR1 |= (adcConfig -> samplingPeriod << (3*(adcConfig->channel)));
-	}
+
 
 	/* 8. Configuramos la secuencia y cuantos elementos hay en la secuencia */
-	// Al hacerlo todo 0, estamos seleccionando solo 1 elemento en el conteo de la secuencia
-	ADC1->SQR1 = 0;
+	if(adcConfig->mode == ADC_SINGLE_CHANNEL){
+		// Al hacerlo todo 0, estamos seleccionando solo 1 elemento en el conteo de la secuencia
+		ADC1->SQR1 = 0;
 
-	// Asignamos el canal de la conversión a la primera posición en la secuencia
-	ADC1->SQR3 |= (adcConfig->channel << 0);
+		// Asignamos el canal de la conversión a la primera posición en la secuencia
+		ADC1->SQR3 |= (adcConfig->channel << 0);
+	}else if(adcConfig->mode == ADC_MULTI_CHANNEL){
+		// Activamos la interrupción al final de cada conversión single.
+		ADC1->CR2 |= ADC_CR2_EOCS;
 
-	/* 9. Configuramos el preescaler del ADC en 2:1 (el mas rápido que se puede tener */
-	ADC->CCR |= ADC_CCR_ADCPRE_0;
+		// Activamos 2 elementos para la conversion
+		ADC1->SQR1 |= ( 1 << ADC_SQR1_L_Pos);
+
+		// Matriculamos cada uno de los caneles en la secuencia de conversion
+		ADC1->SQR3 |= adcConfig->channel << ADC_SQR3_SQ1_Pos;
+		ADC1->SQR3 |= adcConfig->channel2 << ADC_SQR3_SQ2_Pos;
+	}
+
+
+
+	//configuramos el evento como flanco de subida ( Para que cada que se cumpla este evento comience un muestreo)
+	ADC1->CR2 &=  ~(ADC_CR2_EXTEN_0);
+	ADC1->CR2 |= ADC_CR2_EXTEN_0;
+
+
+	//configuramos el EXTSEL para el timer 3 canal 1
+	ADC1->CR2 |= (7 << ADC_CR2_EXTSEL_Pos);
+
 
 	/* 10. Desactivamos las interrupciones globales */
 	__disable_irq();

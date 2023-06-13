@@ -138,12 +138,12 @@ void USART_Config(USART_Handler_t *ptrUsartHandler) {
 			ptrUsartHandler->ptrUSARTx->BRR = 0x02d0;
 		}
 
-	} else {
+	} else if (getConfigPLL() == PLL_16MHz_Frequency){
 		// 2.5 Configuracion del Baudrate (SFR USART_BRR)
 		// Ver tabla de valores (Tabla 73), Frec = 16MHz, overr = 0;
 		if (ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_9600) {
 			// El valor a cargar es 104.1875 -> Mantiza = 104,fraction = 0.1875
-			// Mantiza = 104 = 0x68, fraction = 16 * 0.1875 = 3
+			// Mantiza = 104 = 0x68, fraction = 80 * 0.1875 = 3
 			// Valor a cargar 0x0683
 			// Configurando el Baudrate generator para una velocidad de 9600bps
 			ptrUsartHandler->ptrUSARTx->BRR = 0x0683;
@@ -163,6 +163,28 @@ void USART_Config(USART_Handler_t *ptrUsartHandler) {
 			// Mantiza = 8 = 0x08, fraction = 16 * 0.6875 = 11
 			// valor a cargar 0x008B
 			ptrUsartHandler->ptrUSARTx->BRR = 0x008B;
+		}
+	} else if (getConfigPLL() == PLL_100MHz_Frequency){
+		// 2.5 Configuracion del Baudrate (SFR USART_BRR)
+		// Ver tabla de valores (Tabla 73), Frec = 16MHz, overr = 0;
+		if (ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_9600) {
+			// El valor a cargar es 651.0471 -> Mantiza = 651,fraction = 0.0417
+			// Configurando el Baudrate generator para una velocidad de 9600bps
+			ptrUsartHandler->ptrUSARTx->BRR = 0x28B4;
+		}
+
+		else if (ptrUsartHandler->USART_Config.USART_baudrate
+				== USART_BAUDRATE_19200) {
+			// El valor a cargar es 325.5208 -> Mantiza = 325,fraction = 0.5208
+			ptrUsartHandler->ptrUSARTx->BRR = 0x1484;
+		}
+
+		else if (ptrUsartHandler->USART_Config.USART_baudrate
+				== USART_BAUDRATE_115200) {
+			// El valor a cargar es 52.2535 -> Mantiza = 52,fraction = 0.2535
+			// Mantiza = 8 = 0x08, fraction = 16 * 0.6875 = 11
+			// valor a cargar 0x008B
+			ptrUsartHandler->ptrUSARTx->BRR = 0x0379;
 		}
 	}
 
@@ -279,16 +301,12 @@ int writeChar(USART_Handler_t *ptrUsartHandler, char dataToSend) {
 }
 
 // FUncion para mandar un mensaje ( varios char)
-void writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend) {
-	while (!(ptrUsartHandler->ptrUSARTx->SR & USART_SR_TXE)) {
-		__NOP();
-	}
-	uint8_t count = 0;
-	while (*(msgToSend + count) != 0) {
-		writeChar(ptrUsartHandler, *(msgToSend + count));
-		count++;
-	}
+void writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend){
+	while(*msgToSend != '\0'){
+		writeChar(ptrUsartHandler, *msgToSend);
+		msgToSend++;
 
+	}
 }
 
 uint8_t getRxData(void) {
