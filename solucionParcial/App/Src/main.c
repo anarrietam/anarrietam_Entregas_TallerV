@@ -119,8 +119,8 @@ int main(void){
 	// Se reinicia el acelerometro para así poder comenzar una buena toma de datos
 	i2c_writeSingleRegister(&handlerAcelerometro, POWER_CTL , 0x08);
 
-	//El acelerometro toma muestras por defecto a 100Hz, pero toca subirle la frecuancia, por lo cual al ponemos a
-	i2c_writeSingleRegister(&handlerAcelerometro, BW_RATE , 0xE);
+	//El acelerometro toma muestras por defecto a 100Hz, pero toca subir la frecuencia
+	i2c_writeSingleRegister(&handlerAcelerometro, BW_RATE , 0xF);
 
 
     while(1){
@@ -451,15 +451,20 @@ void parseCommand (char *bufferRecibido){
 		flagSaveData = 1;
 
 	}else if((strcmp(cmdo,"FFTAcelerometro")) == 0){
+		// i sera la posicion en el arreglo
 		int i = 0;
+		// j el indicador
 		int j = 0;
 		writeMsg(&USART1Comm, "Calculando la FFT...\n");
+		// inicializamos la funcion para la fft
 		iniciarFFT = arm_rfft_fast_init_f32(&config_Rfft_fast_f32, tamañoArreglo);
 		if(iniciarFFT == ARM_MATH_SUCCESS){
 			arm_rfft_fast_f32(&config_Rfft_fast_f32, dataAcelerometro,dataFourier,0);
 			arm_abs_f32(dataFourier, dataAcelerometro, tamañoArreglo);
+			// vamos a guardar la variable más grande de fourier y su indice
 			uint32_t max = 0;
-			float maxFFT = dataAcelerometro[i];
+			float maxFFT = dataAcelerometro[1];
+			// revisamos todo el arreglo para así poder revisar el valor maximo
 			for( i=1; i< tamañoArreglo; i++){
 				if(i%2){
 					if(dataAcelerometro[i] > maxFFT){
