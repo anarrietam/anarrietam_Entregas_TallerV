@@ -1,8 +1,8 @@
 /*
  * I2CDriver.c
  *
- *  Created on: Oct 20, 2022
- *      Author: RaphaelACH
+ *  Created on: 2023
+ *      Author: anarrietam
  */
 
 #include <stdint.h>

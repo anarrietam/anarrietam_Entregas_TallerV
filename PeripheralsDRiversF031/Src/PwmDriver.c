@@ -33,6 +33,16 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler) {
 	/* 2a. Estamos en UP_Mode, el limite se carga en ARR y se comienza en 0 */
 	ptrPwmHandler->ptrTIMx->CR1 &= ~TIM_CR1_DIR;
 
+	// Activamos el auto-reload preload enable
+	ptrPwmHandler->ptrTIMx->CR1 |= TIM_CR1_ARPE;
+
+	// Inicializamos los registros
+	ptrPwmHandler->ptrTIMx->EGR |= TIM_EGR_UG;
+
+	// Activamos el registro MOE
+	ptrPwmHandler->ptrTIMx->BDTR |= TIM_BDTR_MOE;
+
+
 	/* 3. Configuramos los bits CCxS del registro TIMy_CCMR1, de forma que sea modo salida
 	 * (para cada canal hay un conjunto CCxS)
 	 *
@@ -40,8 +50,13 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler) {
 	 *
 	 * 5. Y además activamos el preload bit, para que cada vez que exista un update-event
 	 * el valor cargado en el CCRx será recargado en el registro "shadow" del PWM */
+
 	switch (ptrPwmHandler->config.channel) {
 	case PWM_CHANNEL_1: {
+
+		// Se apaga el canal para poder escribir sobre él
+		ptrPwmHandler->ptrTIMx->CCER &= ~(TIM_CCER_CC1E);
+
 		// Seleccionamos como salida el canal
 		ptrPwmHandler->ptrTIMx->CCMR1 &= ~(TIM_CCMR1_CC1S);
 
@@ -51,10 +66,15 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler) {
 		// Activamos la funcionalidad de pre-load
 		ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
 
+
 		break;
 	}
 
 	case PWM_CHANNEL_2: {
+
+		// Se apaga el canal para poder escribir sobre él
+		ptrPwmHandler->ptrTIMx->CCER &= ~(TIM_CCER_CC2E);
+
 		// Seleccionamos como salida el canal
 		ptrPwmHandler->ptrTIMx->CCMR1 &= ~(TIM_CCMR1_CC2S);
 
@@ -67,6 +87,10 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler) {
 	}
 
 	case PWM_CHANNEL_3: {
+
+		// Se apaga el canal para poder escribir sobre él
+		ptrPwmHandler->ptrTIMx->CCER &= ~(TIM_CCER_CC3E);
+
 		// Seleccionamos como salida el canal
 		ptrPwmHandler->ptrTIMx->CCMR2 &= ~(TIM_CCMR2_CC3S);
 
@@ -79,6 +103,10 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler) {
 	}
 
 	case PWM_CHANNEL_4: {
+
+		// Se apaga el canal para poder escribir sobre él
+		ptrPwmHandler->ptrTIMx->CCER &= ~(TIM_CCER_CC4E);
+
 		// Seleccionamos como salida el canal
 		ptrPwmHandler->ptrTIMx->CCMR2 &= ~(TIM_CCMR2_CC4S);
 
@@ -94,10 +122,13 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler) {
 		break;
 	}
 
-		/* 6. Activamos la salida seleccionada */
-		enableOutput(ptrPwmHandler);
 
 	} // fin del switch-case
+
+//	ptrPwmHandler->ptrTIMx->BDTR |= TIM_BDTR_MOE;
+
+	/* 6. Activamos la salida seleccionada */
+	enableOutput(ptrPwmHandler);
 }
 
 /* Función para activar el Timer y activar todo el módulo PWM */

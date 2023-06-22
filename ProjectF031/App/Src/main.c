@@ -23,6 +23,7 @@
 #include "GPIOxDriver.h"
 #include "BasicTimer.h"
 #include "USARTxDriver.h"
+#include "PwmDriver.h"
 
 GPIO_Handler_t hanlderLedPrueba = {0};
 BasicTimer_Handler_t handlerTimerLed = {0};
@@ -31,6 +32,10 @@ BasicTimer_Handler_t handlerTimerLed = {0};
 USART_Handler_t USARTHandler = {0};
 GPIO_Handler_t  PINTX        = {0};
 GPIO_Handler_t  PINRX        = {0};
+
+// Prueba PWM
+GPIO_Handler_t handlerPWMPin = {0};
+PWM_Handler_t  handlerPWM    = {0};
 
 // variables
 char rxChar = 0;
@@ -41,6 +46,7 @@ int main(void){
 	initConfig();
 	// Se imprime el mensaje de inicio
 	writeMsg(&USARTHandler, "Hola");
+
 
     while(1){
     	}
@@ -58,7 +64,7 @@ void initConfig(void){
 	GPIO_Config(&hanlderLedPrueba);
 	GPIO_WritePin(&hanlderLedPrueba, SET);
 
-	handlerTimerLed.ptrTIMx                          = TIM14;
+	handlerTimerLed.ptrTIMx                          = TIM16;
 	handlerTimerLed.TIMx_Config.TIMx_mode            = BTIMER_MODE_UP;
 	handlerTimerLed.TIMx_Config.TIMx_period          = 250;
 	handlerTimerLed.TIMx_Config.TIMx_speed           = BTIMER_SPEED_1ms;
@@ -75,10 +81,10 @@ void initConfig(void){
 	USARTHandler.USART_Config.USART_enable_IntRx     = USART_RX_INTERRUPT_ENABLE;
 	USART_Config(&USARTHandler);
 
-	PINTX.pGPIOx                            = GPIOA;
-	PINTX.GPIO_PinConfig.GPIO_PinNumber     = PIN_2;
+	PINTX.pGPIOx                            = GPIOB;
+	PINTX.GPIO_PinConfig.GPIO_PinNumber     = PIN_6;
 	PINTX.GPIO_PinConfig.GPIO_PinMode       = GPIO_MODE_ALTFN;
-	PINTX.GPIO_PinConfig.GPIO_PinAltFunMode = AF1;
+	PINTX.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
 	GPIO_Config(&PINTX);
 
 	PINRX.pGPIOx                            = GPIOA;
@@ -87,12 +93,30 @@ void initConfig(void){
 	PINRX.GPIO_PinConfig.GPIO_PinAltFunMode = AF1;
 	GPIO_Config(&PINRX);
 
+	handlerPWMPin.pGPIOx                             = GPIOB;
+	handlerPWMPin.GPIO_PinConfig.GPIO_PinNumber      = PIN_5;
+	handlerPWMPin.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handlerPWMPin.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+	handlerPWMPin.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPWMPin.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEED_HIGH;
+	handlerPWMPin.GPIO_PinConfig.GPIO_PinAltFunMode  = AF1;
+	GPIO_Config(&handlerPWMPin);
+
+	handlerPWM.ptrTIMx                               = TIM3;
+	handlerPWM.config.channel                        = PWM_CHANNEL_2;
+	handlerPWM.config.periodo                        = 2000;
+	handlerPWM.config.duttyCicle                     = 1000;
+	handlerPWM.config.prescaler                      = 8000;
+	pwm_Config(&handlerPWM);
+	enableOutput(&handlerPWM);
+	startPwmSignal(&handlerPWM);
 
 
 }
 
-void BasicTimer14_Callback(void){
+void BasicTimer16_Callback(void){
 	GPIOxTooglePin(&hanlderLedPrueba);
+
 }
 
 void usart1Rx_CallBack (void){

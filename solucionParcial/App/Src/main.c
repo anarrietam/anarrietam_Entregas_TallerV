@@ -437,17 +437,21 @@ void parseCommand (char *bufferRecibido){
 		}
 	}else if ((strcmp(cmdo,"dataADC"))==0){
 		writeMsg(&USART1Comm, "Cargando datos de la conversion\n");
+		// Activamos la bandera para guardar los datos de la conversion ADC
 		flagADC = 1;
+		// ESperamos que se cumpla todo el proceso antes de  imprimir los datos
 		while(flagADC){
 			__NOP();
 		}
-		// Se imprimen todos los datos del arreglo
+		// Se imprimen todos los datos del arreglo, además se le agregan un factor de conversion,
+		// donde multiplica el dato por el voltaje maximo permitido ( 3,3v) sobre el numero maximo que pueden represenatr 12 bits
 		for (uint16_t i = 1; i < 257; i++) {
 			sprintf(bufferData, "Channel 1= %.2f V ; Channel 2= %.2f V\n", dataChannel1[i] * (3.3f / 4095.f),dataChannel2[i] * (3.3f / 4095.f));
 			writeMsg(&USART1Comm, bufferData);
 		}
 	} else if((strcmp(cmdo,"dataAcelerometro")) == 0){
 		writeMsg(&USART1Comm, "Iniciando toma de datos del Acelerometro:\n");
+		// Se activan los datos para guardar los datos del aceleromero
 		flagSaveData = 1;
 
 	}else if((strcmp(cmdo,"FFTAcelerometro")) == 0){
@@ -476,6 +480,7 @@ void parseCommand (char *bufferRecibido){
 					j++;
 				}
 			}
+			// convertimos los datos obtenidos a frecuencia, multiplicando el dato maximo por la frecuncia de muestreo y diviendo por la cantidad de datos
 			float freqHz = (max*200)/512.0f;
 			sprintf(bufferData, "Frecuencia = %f Hz \n", freqHz);
 			writeMsg(&USART1Comm, bufferData);
@@ -487,17 +492,22 @@ void parseCommand (char *bufferRecibido){
 }
 
 void leerAcelerometro (void){
+
+	// Se tomaran lecturas de los datos del acelerometro cada que se cumpla una interrupcion del timer 5
 	if(flagReadData){
 		ejeZ_Low = i2c_readSingleRegister(&handlerAcelerometro, ACCEL_DATAZ0);
 		ejeZ_High = i2c_readSingleRegister(&handlerAcelerometro, ACCEL_DATAZ1);
 		ejeZ = ejeZ_High << 8 | ejeZ_Low;
+		// cada que se lean los datos del eje z, se bajara la bandera encarga de leer los datos del acelerometro
 		flagReadData = 0;
+		// cuando se actuva la bandera por comando, es que se comenzara a guardar datos
 		if(flagSaveData){
 			dataAcelerometro[countAcelerometro] = ejeZ;
 			countAcelerometro++;
 			if(countAcelerometro > 513){
 				flagSaveData = 0;
 				countAcelerometro = 0;
+				// imprimimos los datos tomados del acelerometro
 				for (uint16_t i=1; i<513; i++){
 					sprintf(bufferData, "Dato = %.2f \n", dataAcelerometro[i]*(9.8f/253.f));
 					writeMsg(&USART1Comm, bufferData);
@@ -518,16 +528,20 @@ void usart1Rx_CallBack (void){
 
 void adcComplete_Callback(void){
 
+	// Esperamos que se active la bandera que nos ayuda para guardar los datos
 	if(flagADC){
-	if (channelADC==0){
-		dataChannel1[countADC]=(float)getADC();
-	}
-	else{
-		dataChannel2[countADC]=(float) getADC();
-		countADC++;
-	}
+		// Agregamos los datos a los arreglos correspondientes de cada canal
+		if (channelADC==0){
+			dataChannel1[countADC]=(float)getADC();
+		}
+		else{
+			dataChannel2[countADC]=(float) getADC();
+			countADC++;
+		}
 
 	channelADC++;
+	// cuando ya llegamos a los 257 datos, ponemos la bandera en 0,
+	// para así dejar de tomar datos y reiniciamos todas las variables que nos ayudan a controlar esta ocnversion
 	if(countADC>= 257){
 		countADC=0;
 		flagADC=0;
