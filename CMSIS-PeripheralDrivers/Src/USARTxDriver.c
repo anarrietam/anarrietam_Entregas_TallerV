@@ -164,6 +164,14 @@ void USART_Config(USART_Handler_t *ptrUsartHandler) {
 			// valor a cargar 0x008B
 			ptrUsartHandler->ptrUSARTx->BRR = 0x008B;
 		}
+
+		else if (ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_6000){
+			// El valor a cargar es 166,6667 -> Mantiza = 166 ,fraction = 0.6667
+			// Mantiza = 166 = 0xA6, fraction = 16 * 0.6667 = 11
+			// valor a cargar 0x0A6B
+			ptrUsartHandler->ptrUSARTx->BRR = 0x0A6B;
+
+		}
 	} else if (getConfigPLL() == PLL_100MHz_Frequency){
 		// 2.5 Configuracion del Baudrate (SFR USART_BRR)
 		// Ver tabla de valores (Tabla 73), Frec = 16MHz, overr = 0;
